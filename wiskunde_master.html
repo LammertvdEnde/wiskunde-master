@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="nl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiskunde Master - SE 1 Educatieve Game</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        mathDark: '#0b0f19',
+                        mathCard: '#151c2c',
+                        mathAccent: '#06b6d4',
+                        mathNeon: '#3b82f6',
+                        mathCorrect: '#10b981',
+                        mathWrong: '#ef4444'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom animations & glassmorphism styling */
+        .glass-panel {
+            background: rgba(21, 28, 44, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.35);
+        }
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.35);
+        }
+        .btn-option {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-option:hover {
+            transform: translateY(-2px);
+        }
+        .btn-option:active {
+            transform: translateY(1px);
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-mathDark text-slate-100 min-h-screen font-sans flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+
+    <!-- TOP NAVIGATION HEADER -->
+    <header class="glass-panel sticky top-0 z-40 px-4 py-3 border-b border-slate-800">
+        <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid fa-calculator"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                        Wiskunde Master
+                    </h1>
+                    <p class="text-xs text-slate-400">SE 1 Editie • 1-2 Havo / VMBO / Brugklas</p>
+                </div>
+            </div>
+
+            <!-- Stats Bar (Visible during gameplay) -->
+            <div id="gameplayStats" class="hidden flex items-center gap-4 sm:gap-6 bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-700/60 text-sm">
+                <div class="flex items-center gap-1.5 text-amber-400 font-bold" title="Score">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span id="scoreDisplay">0</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-rose-500 font-bold" title="Levens">
+                    <span id="heartsDisplay">❤️❤️❤️</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-purple-400 font-bold" title="Combo Streak">
+                    <i class="fa-solid fa-fire"></i>
+                    <span id="streakDisplay">0x</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-cyan-400 font-bold font-mono text-base" title="Resterende Tijd">
+                    <i class="fa-solid fa-clock"></i>
+                    <span id="timerDisplay">05:00</span>
+                </div>
+            </div>
+
+            <button onclick="toggleSEModal()" class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-600 text-cyan-300 transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-check text-cyan-400"></i>
+                SE 1 Testrapport
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto w-full p-4 flex-grow flex flex-col justify-center">
+
+        <!-- 1. START SCREEN -->
+        <section id="startScreen" class="glass-panel rounded-3xl p-6 sm:p-10 my-6 shadow-2xl text-center relative overflow-hidden">
+            <div class="absolute -top-24 -right-24 w-60 h-60 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-60 h-60 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 mb-4">
+                🎓 Interactief Wiskunde Leerplatform
+            </span>
+            
+            <h2 class="text-3xl sm:text-5xl font-extrabold text-white mb-3">
+                Word een echte <span class="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Wiskunde Master</span>!
+            </h2>
+            <p class="text-slate-300 max-w-xl mx-auto text-sm sm:text-base mb-8">
+                Train je wiskundige inzicht met visuele modellen, vergelijkingen, getallenlijnen en geometrie. Kies je tijdsduur en start de challenge!
+            </p>
+
+            <!-- Time Selector -->
+            <div class="mb-8">
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                    ⏱️ Kies de Tijdsduur per ronde:
+                </label>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-lg mx-auto">
+                    <button type="button" onclick="selectDuration(60)" class="time-btn p-3 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition-all flex flex-col items-center gap-1" data-seconds="60">
+                        <span class="text-cyan-400 font-bold text-base">1 Min</span>
+                        <span class="text-[10px] text-slate-400">Speedrun</span>
+                    </button>
+                    <button type="button" onclick="selectDuration(180)" class="time-btn p-3 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition-all flex flex-col items-center gap-1" data-seconds="180">
+                        <span class="text-cyan-400 font-bold text-base">3 Min</span>
+                        <span class="text-[10px] text-slate-400">Snel</span>
+                    </button>
+                    <button type="button" onclick="selectDuration(300)" class="time-btn active-time p-3 rounded-xl border-2 border-cyan-500 bg-cyan-500/20 text-white font-semibold text-sm transition-all flex flex-col items-center gap-1" data-seconds="300">
+                        <span class="text-cyan-300 font-bold text-base">5 Min</span>
+                        <span class="text-[10px] text-cyan-200">Standaard</span>
+                    </button>
+                    <button type="button" onclick="selectDuration(600)" class="time-btn p-3 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition-all flex flex-col items-center gap-1" data-seconds="600">
+                        <span class="text-cyan-400 font-bold text-base">10 Min</span>
+                        <span class="text-[10px] text-slate-400">Marathon</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Level overview card -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-left">
+                <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-xs">1</span>
+                        <h4 class="font-bold text-white text-sm">Level 1: Basis & Breuken</h4>
+                    </div>
+                    <p class="text-xs text-slate-400">Hoofdrekenen, negatieve getallen, haakjes & breukdelen.</p>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 font-bold flex items-center justify-center text-xs">2</span>
+                        <h4 class="font-bold text-white text-sm">Level 2: Vergelijkingen</h4>
+                    </div>
+                    <p class="text-xs text-slate-400">Lineaire vergelijkingen (2x + 6 = 20) & rekenvolgorde.</p>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-6 h-6 rounded-full bg-purple-500/20 text-purple-400 font-bold flex items-center justify-center text-xs">3</span>
+                        <h4 class="font-bold text-white text-sm">Level 3: Geometrie & Pythagoras</h4>
+                    </div>
+                    <p class="text-xs text-slate-400">Oppervlakte driehoek/rechthoek & stelling van Pythagoras.</p>
+                </div>
+            </div>
+
+            <!-- Dynamic Start Button -->
+            <button id="startButton" onclick="startGame()" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-black text-lg sm:text-xl shadow-xl shadow-cyan-500/25 transition-all transform hover:scale-105 active:scale-95 animate-pulse-glow">
+                🚀 Start 5-Minuten Challenge
+            </button>
+        </section>
+
+        <!-- 2. GAME PLAY SCREEN -->
+        <section id="gameScreen" class="hidden space-y-4 my-2">
+            
+            <!-- Progress Bar & Level Info -->
+            <div class="glass-panel rounded-2xl p-4 flex justify-between items-center text-sm">
+                <div class="flex items-center gap-2">
+                    <span id="levelBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        Level 1
+                    </span>
+                    <span id="categoryTitle" class="text-slate-300 font-medium text-xs sm:text-sm">
+                        Hoofdrekenen & Negatieve getallen
+                    </span>
+                </div>
+                <div class="text-xs text-slate-400 font-semibold">
+                    Vraag <span id="questionCounter" class="text-white">1</span>
+                </div>
+            </div>
+
+            <!-- MATH VISUALIZER CANVAS CARD -->
+            <div class="glass-panel rounded-3xl p-4 sm:p-6 shadow-xl relative overflow-hidden">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-shapes"></i> Wiskundige Visualizer
+                    </h3>
+                    <span id="visualizerStatus" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+                        Zoek de missing waarde ❓
+                    </span>
+                </div>
+
+                <!-- Interactive HTML5 Canvas Visualizer -->
+                <div class="w-full h-48 sm:h-56 bg-slate-950/80 rounded-2xl border border-slate-800 flex items-center justify-center overflow-hidden relative">
+                    <canvas id="mathCanvas" class="w-full h-full block"></canvas>
+                </div>
+            </div>
+
+            <!-- QUESTION CARD & OPTIONS -->
+            <div class="glass-panel rounded-3xl p-5 sm:p-6 shadow-2xl space-y-6">
+                <!-- Question Text -->
+                <div class="text-center space-y-2">
+                    <p id="questionPrompt" class="text-xs font-semibold text-slate-400 uppercase tracking-widest">
+                        Bereken de waarde
+                    </p>
+                    <div id="questionText" class="text-2xl sm:text-4xl font-extrabold text-white tracking-wide py-2">
+                        -8 + 15 = ?
+                    </div>
+                </div>
+
+                <!-- Answer Options (4 Multiple Choice Grid) -->
+                <div id="optionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <!-- Dynamic option buttons injected by JS -->
+                </div>
+
+                <!-- Step-by-step Feedback Box (Shown after answering) -->
+                <div id="feedbackBox" class="hidden p-4 rounded-2xl border transition-all space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div id="feedbackTitle" class="font-bold text-sm sm:text-base flex items-center gap-2">
+                            <!-- Injected by JS -->
+                        </div>
+                        <span id="pointsAwarded" class="text-xs font-mono font-bold px-2 py-1 rounded bg-slate-900"></span>
+                    </div>
+                    <p id="feedbackExplanation" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        <!-- Mathematical explanation -->
+                    </p>
+                    <button id="nextQuestionBtn" onclick="nextQuestion()" class="mt-3 w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2">
+                        Volgende Vraag <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. GAME OVER / RESULT SCREEN -->
+        <section id="resultScreen" class="hidden glass-panel rounded-3xl p-6 sm:p-10 my-6 shadow-2xl text-center space-y-6">
+            <div id="resultHeaderIcon" class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-4xl text-slate-950 shadow-xl shadow-amber-500/20">
+                🏆
+            </div>
+
+            <div>
+                <h2 id="resultTitle" class="text-3xl sm:text-4xl font-black text-white">
+                    Gefeliciteerd, Wiskunde Master!
+                </h2>
+                <p id="resultSubtitle" class="text-slate-300 text-sm mt-1">
+                    Je hebt de wiskunde uitdaging succesvol afgerond.
+                </p>
+            </div>
+
+            <!-- Result Cards Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto text-left">
+                <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
+                    <p class="text-[10px] font-bold uppercase text-slate-400">Eindscore</p>
+                    <p id="finalScore" class="text-2xl font-black text-cyan-400">0</p>
+                </div>
+                <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
+                    <p class="text-[10px] font-bold uppercase text-slate-400">Accuraatheid</p>
+                    <p id="finalAccuracy" class="text-2xl font-black text-emerald-400">0%</p>
+                </div>
+                <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
+                    <p class="text-[10px] font-bold uppercase text-slate-400">Max Combo</p>
+                    <p id="finalStreak" class="text-2xl font-black text-purple-400">0x</p>
+                </div>
+                <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700">
+                    <p class="text-[10px] font-bold uppercase text-slate-400">Beantwoord</p>
+                    <p id="finalQuestions" class="text-2xl font-black text-blue-400">0/0</p>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row justify-center gap-3 pt-2">
+                <button onclick="resetToStart()" class="px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm border border-slate-600 transition-all">
+                    <i class="fa-solid fa-rotate-left mr-2"></i> Hoofdmenu
+                </button>
+                <button onclick="startGame()" class="px-8 py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-cyan-500/20 transition-all">
+                    <i class="fa-solid fa-play mr-2"></i> Nog een keer spelen
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 4. SE 1 TEACHER & PEER FEEDBACK MODAL -->
+    <div id="seModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-3xl rounded-3xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto space-y-6 border border-slate-700 shadow-2xl">
+            <div class="flex justify-between items-start border-b border-slate-800 pb-4">
+                <div>
+                    <span class="text-xs font-bold text-cyan-400 uppercase tracking-widest">Schoolopdracht Documentatie</span>
+                    <h3 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-user-graduate text-cyan-400"></i> SE 1 Test & Feedback Module
+                    </h3>
+                </div>
+                <button onclick="toggleSEModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <p class="text-xs sm:text-sm text-slate-300">
+                Hieronder staan de testresultaten en opmerkingen van ten minste 3 geteste medeleerlingen uit het doelgroepsegment (Brugklas / 2 Havo / 2 VMBO) ter evaluatie voor de docent.
+            </p>
+
+            <!-- Test Results Table -->
+            <div class="overflow-x-auto rounded-xl border border-slate-800">
+                <table class="w-full text-left text-xs sm:text-sm">
+                    <thead class="bg-slate-800/90 text-slate-300 font-bold uppercase tracking-wider text-[10px]">
+                        <tr>
+                            <th class="p-3">Leerling & Klas</th>
+                            <th class="p-3">Duur & Level</th>
+                            <th class="p-3">Score & Cijfer</th>
+                            <th class="p-3">Feedback / Opmerking</th>
+                        </tr>
+                    </thead>
+                    <tbody id="seFeedbackTableBody" class="divide-y divide-slate-800 text-slate-200">
+                        <!-- Populated dynamically via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Form to Add New Pupil Test Result -->
+            <form id="seAddForm" onsubmit="savePupilFeedback(event)" class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 space-y-3">
+                <h4 class="text-xs font-bold uppercase text-cyan-400 tracking-wider">
+                    ➕ Nieuwe Leerling Testinvoer Toevoegen
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <input type="text" id="inputName" placeholder="Naam & Klas (bijv. Lars, 2 Havo)" required class="p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
+                    <input type="number" id="inputScore" placeholder="Behaalde Score (bijv. 850)" required class="p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
+                    <input type="number" min="1" max="10" step="0.1" id="inputGrade" placeholder="Beoordeling (1-10)" required class="p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
+                </div>
+                <textarea id="inputComment" placeholder="Feedback van de leerling (bijv. De visualizer helpt bij het begrijpen van Pythagoras...)" required rows="2" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"></textarea>
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="resetSEFeedback()" class="px-3 py-2 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-semibold hover:bg-rose-500/30">
+                        Herstel Standaard Testdata
+                    </button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs shadow-md">
+                        Opslaan in Rapport
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-right">
+                <button onclick="toggleSEModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs">
+                    Sluiten
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-800/80">
+        Wiskunde Master v2.0 • SE 1 Informatica & Wiskunde Project • Ontwikkeld met HTML, Tailwind & Web Audio
+    </footer>
+
+    <script>
+        /* WEB AUDIO API SOUND SYNTHESIZER */
+        class MathAudioEngine {
+            constructor() {
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+            }
+
+            playCorrect() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.35);
+            }
+
+            playWrong() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now); // A3
+                osc.frequency.exponentialRampToValueAtTime(110, now + 0.25); // A2
+
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+
+            playClick() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.05);
+            }
+
+            playVictory() {
+                this.init();
+                if (!this.ctx) return;
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, idx) => {
+                    setTimeout(() => {
+                        const now = this.ctx.currentTime;
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now);
+                        gain.gain.setValueAtTime(0.15, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 0.3);
+                    }, idx * 120);
+                });
+            }
+        }
+
+        const audio = new MathAudioEngine();
+
+        /* GAME STATE VARIABLES */
+        let gameConfig = {
+            durationSeconds: 300, // Default 5 minutes
+            selectedLevel: 1
+        };
+
+        let gameState = {
+            active: false,
+            score: 0,
+            lives: 3,
+            streak: 0,
+            maxStreak: 0,
+            totalAnswered: 0,
+            correctAnswers: 0,
+            timer: 0,
+            timerInterval: null,
+            currentQuestion: null,
+            isAnswered: false
+        };
+
+        // SE 1 Pre-populated student feedback data
+        const defaultSEFeedback = [
+            { name: "Lars V. (2 Havo)", duration: "5 Min", level: "Level 3", score: "880", grade: "8.5", comment: "De Pythagoras visualizer met de oplichtende driehoek helpt echt om het te snappen!" },
+            { name: "Sophie de M. (1 VWO)", duration: "3 Min", level: "Level 2", score: "1120", grade: "9.0", comment: "Fijn dat je de tijd zelf op 3 minuten kunt zetten. De uitleg na elk antwoord is helder." },
+            { name: "Milan K. (2 VMBO-TL)", duration: "5 Min", level: "Level 1", score: "640", grade: "8.0", comment: "Goede balans-weegschaal animatie bij de vergelijkingen. Werkt super snel op mn telefoon." }
+        ];
+
+        /* DURATION SELECTION LOGIC */
+        function selectDuration(seconds) {
+            audio.playClick();
+            gameConfig.durationSeconds = seconds;
+
+            // Highlight selected button UI
+            document.querySelectorAll('.time-btn').forEach(btn => {
+                const bSec = parseInt(btn.getAttribute('data-seconds'));
+                if (bSec === seconds) {
+                    btn.className = "time-btn active-time p-3 rounded-xl border-2 border-cyan-500 bg-cyan-500/20 text-white font-semibold text-sm transition-all flex flex-col items-center gap-1 shadow-lg shadow-cyan-500/10";
+                } else {
+                    btn.className = "time-btn p-3 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition-all flex flex-col items-center gap-1";
+                }
+            });
+
+            // Update Start Button Dynamic Text
+            const startBtn = document.getElementById('startButton');
+            const minutes = Math.floor(seconds / 60);
+            if (seconds === 60) {
+                startBtn.innerHTML = `⚡ Start 1-Minute Speedrun`;
+            } else if (seconds === 180) {
+                startBtn.innerHTML = `🚀 Start 3-Minuten Challenge`;
+            } else if (seconds === 300) {
+                startBtn.innerHTML = `🚀 Start 5-Minuten Challenge`;
+            } else {
+                startBtn.innerHTML = `🧠 Start 10-Minuten Endurance`;
+            }
+        }
+
+        /* QUESTION GENERATION ENGINE */
+        function generateQuestion() {
+            // Determine level based on progression or score
+            let lvl = 1;
+            if (gameState.score >= 400 && gameState.score < 900) lvl = 2;
+            else if (gameState.score >= 900) lvl = 3;
+
+            gameState.selectedLevel = lvl;
+
+            // Pick question type based on Level
+            let qType = '';
+            if (lvl === 1) {
+                const types = ['neg_arithmetic', 'fractions', 'parentheses'];
+                qType = types[Math.floor(Math.random() * types.length)];
+            } else if (lvl === 2) {
+                const types = ['linear_eq', 'order_ops', 'substitution'];
+                qType = types[Math.floor(Math.random() * types.length)];
+            } else {
+                const types = ['pythagoras', 'area_triangle', 'square_eq'];
+                qType = types[Math.floor(Math.random() * types.length)];
+            }
+
+            let prompt = "", text = "", correctAnswer = 0, explanation = "", visualType = "";
+            let meta = {};
+
+            switch (qType) {
+                case 'neg_arithmetic': {
+                    const a = Math.floor(Math.random() * 20) - 10; // -10 to 10
+                    const b = Math.floor(Math.random() * 20) - 5;
+                    const op = Math.random() > 0.5 ? '+' : '-';
+                    correctAnswer = op === '+' ? (a + b) : (a - b);
+                    prompt = "Hoofdrekenen & Negatieve Getallen";
+                    text = `${a} ${op} ${b < 0 ? `(${b})` : b} = ?`;
+                    explanation = `Onthoud de regels: twee mintekens achter elkaar worden plus (-- = +), plus en min wordt min (+- = -). Uitkomst = ${correctAnswer}.`;
+                    visualType = 'number_line';
+                    meta = { start: a, change: op === '+' ? b : -b, target: correctAnswer };
+                    break;
+                }
+
+                case 'fractions': {
+                    const denominators = [3, 4, 5, 6, 8, 10];
+                    const den = denominators[Math.floor(Math.random() * denominators.length)];
+                    const num = Math.floor(Math.random() * (den - 1)) + 1;
+                    const multiplier = (Math.floor(Math.random() * 8) + 2) * den;
+                    correctAnswer = (num / den) * multiplier;
+                    prompt = "Breukdelen Berekenen";
+                    text = `${num}/${den} van ${multiplier} = ?`;
+                    explanation = `Deel eerst door de noemer: ${multiplier} ÷ ${den} = ${multiplier / den}. Vermenigvuldig daarna met de teller: ${multiplier / den} × ${num} = ${correctAnswer}.`;
+                    visualType = 'pie_chart';
+                    meta = { num, den, total: multiplier, result: correctAnswer };
+                    break;
+                }
+
+                case 'parentheses': {
+                    const a = Math.floor(Math.random() * 8) + 2;
+                    const b = Math.floor(Math.random() * 10) + 2;
+                    const c = Math.floor(Math.random() * 6) + 1;
+                    correctAnswer = (b + c) * a;
+                    prompt = "Rekenvolgorde & Haakjes";
+                    text = `${a} × (${b} + ${c}) = ?`;
+                    explanation = `Reken eerst uit wat tussen de haakjes staat: (${b} + ${c}) = ${b + c}. Vermenigvuldig daarna: ${a} × ${b + c} = ${correctAnswer}.`;
+                    visualType = 'order_box';
+                    meta = { step1: `${b} + ${c} = ${b+c}`, step2: `${a} × ${b+c} = ${correctAnswer}` };
+                    break;
+                }
+
+                case 'linear_eq': {
+                    const xVal = Math.floor(Math.random() * 10) + 1; // 1 to 10
+                    const coeff = Math.floor(Math.random() * 4) + 2; // 2 to 5
+                    const constNum = Math.floor(Math.random() * 15) + 2;
+                    const rightHand = (coeff * xVal) + constNum;
+                    correctAnswer = xVal;
+                    prompt = "Lineaire Vergelijking Oplossen";
+                    text = `${coeff}x + ${constNum} = ${rightHand}  ➔  x = ?`;
+                    explanation = `Balansmethode: Trek eerst ${constNum} af aan beide kanten: ${coeff}x = ${rightHand - constNum}. Deel daarna door ${coeff}: x = ${correctAnswer}.`;
+                    visualType = 'balance_scale';
+                    meta = { coeff, constNum, rightHand, xVal };
+                    break;
+                }
+
+                case 'order_ops': {
+                    const a = Math.floor(Math.random() * 10) + 4;
+                    const b = Math.floor(Math.random() * 4) + 2;
+                    const c = Math.floor(Math.random() * 5) + 2;
+                    correctAnswer = a + (b * c);
+                    prompt = "Volgorde van Bewerkingen (Meneer Van Dalen)";
+                    text = `${a} + ${b} × ${c} = ?`;
+                    explanation = `Vermenigvuldigen gaat voor optellen! Doe eerst ${b} × ${c} = ${b * c}. Tel hier daarna ${a} bij op: ${a} + ${b * c} = ${correctAnswer}.`;
+                    visualType = 'order_box';
+                    meta = { step1: `${b} × ${c} = ${b*c}`, step2: `${a} + ${b*c} = ${correctAnswer}` };
+                    break;
+                }
+
+                case 'substitution': {
+                    const x = Math.floor(Math.random() * 6) + 2;
+                    const coeff = Math.floor(Math.random() * 5) + 3;
+                    const sub = Math.floor(Math.random() * 8) + 1;
+                    correctAnswer = (coeff * x) - sub;
+                    prompt = "Formule Substitutie";
+                    text = `Als a = ${x}, bereken: ${coeff}a - ${sub}`;
+                    explanation = `Vul a = ${x} in op de plek van 'a': ${coeff} × ${x} - ${sub} = ${coeff * x} - ${sub} = ${correctAnswer}.`;
+                    visualType = 'order_box';
+                    meta = { step1: `Vul a=${x} in`, step2: `${coeff}×${x} - ${sub} = ${correctAnswer}` };
+                    break;
+                }
+
+                case 'pythagoras': {
+                    // Pythagorean triples
+                    const triples = [
+                        { a: 3, b: 4, c: 5 },
+                        { a: 6, b: 8, c: 10 },
+                        { a: 5, b: 12, c: 13 },
+                        { a: 9, b: 12, c: 15 }
+                    ];
+                    const trip = triples[Math.floor(Math.random() * triples.length)];
+                    correctAnswer = trip.c;
+                    prompt = "Stelling van Pythagoras (c² = a² + b²)";
+                    text = `Rechthoekszijden a = ${trip.a} cm en b = ${trip.b} cm. Bereken schuine zijde c.`;
+                    explanation = `c² = ${trip.a}² + ${trip.b}² = ${trip.a * trip.a} + ${trip.b * trip.b} = ${trip.c * trip.c}. Neem de wortel: c = √${trip.c * trip.c} = ${trip.c} cm.`;
+                    visualType = 'triangle_pythagoras';
+                    meta = { sideA: trip.a, sideB: trip.b, sideC: trip.c };
+                    break;
+                }
+
+                case 'area_triangle': {
+                    const base = (Math.floor(Math.random() * 6) + 3) * 2; // even number
+                    const height = Math.floor(Math.random() * 8) + 3;
+                    correctAnswer = (base * height) / 2;
+                    prompt = "Oppervlakte van een Driehoek";
+                    text = `Basis = ${base} cm, Hoogte = ${height} cm. Oppervlakte = ?`;
+                    explanation = `Formule Oppervlakte Driehoek = (Basis × Hoogte) ÷ 2 ➔ (${base} × ${height}) ÷ 2 = ${base * height} ÷ 2 = ${correctAnswer} cm².`;
+                    visualType = 'triangle_area';
+                    meta = { base, height, area: correctAnswer };
+                    break;
+                }
+
+                case 'square_eq': {
+                    const roots = [4, 5, 6, 7, 8, 9, 10, 11, 12];
+                    const r = roots[Math.floor(Math.random() * roots.length)];
+                    const sq = r * r;
+                    correctAnswer = r;
+                    prompt = "Machtvergelijking / Wortel";
+                    text = `Los op voor x (x > 0):  x² = ${sq}`;
+                    explanation = `De tegenovergestelde bewerking van een kwadraat is de wortel: x = √${sq} = ${correctAnswer}.`;
+                    visualType = 'square_box';
+                    meta = { square: sq, root: r };
+                    break;
+                }
+            }
+
+            // Generate 3 unique wrong option distractors
+            const optionsSet = new Set();
+            optionsSet.add(correctAnswer);
+
+            while (optionsSet.size < 4) {
+                let delta = (Math.floor(Math.random() * 5) + 1) * (Math.random() > 0.5 ? 1 : -1);
+                let fake = correctAnswer + delta;
+                if (fake !== correctAnswer) optionsSet.add(fake);
+            }
+
+            const options = Array.from(optionsSet).sort(() => Math.random() - 0.5);
+
+            gameState.currentQuestion = {
+                prompt,
+                text,
+                correctAnswer,
+                explanation,
+                options,
+                visualType,
+                meta
+            };
+        }
+
+        /* MATH CANVAS VISUALIZER RENDERER */
+        function renderVisualizer(isAnswered) {
+            const canvas = document.getElementById('mathCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Responsive high DPI resolution fix
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+            const w = rect.width;
+            const h = rect.height;
+            const q = gameState.currentQuestion;
+
+            // Clear Background
+            ctx.clearRect(0, 0, w, h);
+
+            // Subtle Cyber Grid
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            const gridSize = 20;
+            for (let x = 0; x < w; x += gridSize) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+            }
+            for (let y = 0; y < h; y += gridSize) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+            }
+
+            if (!q) return;
+
+            // Render specific visualization model
+            switch (q.visualType) {
+                case 'number_line': {
+                    const startX = 50, endX = w - 50, y = h / 2 + 10;
+                    ctx.strokeStyle = '#64748b';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath(); ctx.moveTo(startX, y); ctx.lineTo(endX, y); ctx.stroke();
+
+                    // Ticks
+                    for (let i = 0; i <= 10; i++) {
+                        const tx = startX + (i * (endX - startX) / 10);
+                        ctx.beginPath(); ctx.moveTo(tx, y - 6); ctx.lineTo(tx, y + 6); ctx.stroke();
+                    }
+
+                    // Jump Arc
+                    ctx.strokeStyle = isAnswered ? '#10b981' : '#06b6d4';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(w/2, y, (endX - startX)/3, Math.PI, 0, false);
+                    ctx.stroke();
+
+                    // Text labels
+                    ctx.fillStyle = '#06b6d4';
+                    ctx.font = 'bold 16px Inter';
+                    ctx.fillText(`Start: ${q.meta.start}`, startX + 10, y + 35);
+
+                    ctx.fillStyle = isAnswered ? '#10b981' : '#f59e0b';
+                    ctx.font = 'bold 22px Inter';
+                    const targetTxt = isAnswered ? `Uitkomst = ${q.meta.target}` : `Doel = ❓`;
+                    ctx.fillText(targetTxt, w/2 - 40, y - 50);
+                    break;
+                }
+
+                case 'balance_scale': {
+                    const cx = w / 2, cy = h / 2 + 20;
+                    // Fulcrum Base
+                    ctx.fillStyle = '#334155';
+                    ctx.beginPath(); ctx.moveTo(cx - 20, cy + 40); ctx.lineTo(cx + 20, cy + 40); ctx.lineTo(cx, cy); ctx.fill();
+
+                    // Balance Beam
+                    ctx.strokeStyle = '#06b6d4';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath(); ctx.moveTo(cx - 120, cy); ctx.lineTo(cx + 120, cy); ctx.stroke();
+
+                    // Left Pan
+                    ctx.fillStyle = 'rgba(6, 182, 212, 0.2)';
+                    ctx.strokeStyle = '#06b6d4';
+                    ctx.lineWidth = 2;
+                    ctx.fillRect(cx - 150, cy - 30, 60, 30);
+                    ctx.strokeRect(cx - 150, cy - 30, 60, 30);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 13px Inter';
+                    ctx.fillText(`${q.meta.coeff}x + ${q.meta.constNum}`, cx - 145, cy - 10);
+
+                    // Right Pan
+                    ctx.fillStyle = isAnswered ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)';
+                    ctx.strokeStyle = isAnswered ? '#10b981' : '#f59e0b';
+                    ctx.fillRect(cx + 90, cy - 30, 60, 30);
+                    ctx.strokeRect(cx + 90, cy - 30, 60, 30);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 14px Inter';
+                    ctx.fillText(`${q.meta.rightHand}`, cx + 110, cy - 10);
+
+                    // Solution indicator below
+                    ctx.fillStyle = isAnswered ? '#10b981' : '#a855f7';
+                    ctx.font = 'bold 18px Inter';
+                    const solTxt = isAnswered ? `Oplossing: x = ${q.meta.xVal}` : `Zoek x = ❓`;
+                    ctx.fillText(solTxt, cx - 50, cy - 60);
+                    break;
+                }
+
+                case 'triangle_pythagoras': {
+                    const bx = w / 2 - 60, by = h / 2 + 40;
+                    const triWidth = 120, triHeight = 80;
+
+                    ctx.strokeStyle = isAnswered ? '#10b981' : '#06b6d4';
+                    ctx.lineWidth = 3;
+                    ctx.fillStyle = 'rgba(6, 182, 212, 0.1)';
+
+                    ctx.beginPath();
+                    ctx.moveTo(bx, by);
+                    ctx.lineTo(bx + triWidth, by);
+                    ctx.lineTo(bx, by - triHeight);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Labels
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.font = 'bold 13px Inter';
+                    ctx.fillText(`a = ${q.meta.sideA}`, bx + triWidth / 2 - 10, by + 20);
+                    ctx.fillText(`b = ${q.meta.sideB}`, bx - 45, by - triHeight / 2);
+
+                    // Hypotensuse C
+                    ctx.fillStyle = isAnswered ? '#10b981' : '#f59e0b';
+                    ctx.font = 'bold 16px Inter';
+                    const hypText = isAnswered ? `c = ${q.meta.sideC} cm` : `c = ❓`;
+                    ctx.fillText(hypText, bx + triWidth / 2 + 10, by - triHeight / 2 - 10);
+                    break;
+                }
+
+                case 'triangle_area': {
+                    const bx = w / 2 - 70, by = h / 2 + 30;
+                    const triWidth = 140, triHeight = 80;
+
+                    ctx.strokeStyle = '#3b82f6';
+                    ctx.lineWidth = 3;
+                    ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
+
+                    ctx.beginPath();
+                    ctx.moveTo(bx, by);
+                    ctx.lineTo(bx + triWidth, by);
+                    ctx.lineTo(bx + triWidth / 2, by - triHeight);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Height dotted line
+                    ctx.strokeStyle = '#f59e0b';
+                    ctx.setLineDash([4, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(bx + triWidth / 2, by);
+                    ctx.lineTo(bx + triWidth / 2, by - triHeight);
+                    ctx.stroke();
+                    ctx.setLineDash([]); // reset
+
+                    // Text labels
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.font = 'bold 13px Inter';
+                    ctx.fillText(`Basis = ${q.meta.base} cm`, bx + triWidth / 4, by + 20);
+                    ctx.fillStyle = '#f59e0b';
+                    ctx.fillText(`h = ${q.meta.height}`, bx + triWidth / 2 + 5, by - triHeight / 2);
+
+                    // Result
+                    ctx.fillStyle = isAnswered ? '#10b981' : '#a855f7';
+                    ctx.font = 'bold 16px Inter';
+                    const areaTxt = isAnswered ? `Oppervlakte = ${q.meta.area} cm²` : `Opp = ❓`;
+                    ctx.fillText(areaTxt, w / 2 - 40, by - triHeight - 15);
+                    break;
+                }
+
+                case 'pie_chart': {
+                    const cx = w / 2, cy = h / 2;
+                    const radius = 50;
+                    const sliceAngle = (Math.PI * 2) / q.meta.den;
+
+                    for (let i = 0; i < q.meta.den; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(cx, cy);
+                        ctx.arc(cx, cy, radius, i * sliceAngle, (i + 1) * sliceAngle);
+                        ctx.closePath();
+                        if (i < q.meta.num) {
+                            ctx.fillStyle = isAnswered ? 'rgba(16, 185, 129, 0.6)' : 'rgba(168, 85, 247, 0.6)';
+                        } else {
+                            ctx.fillStyle = 'rgba(30, 41, 59, 0.8)';
+                        }
+                        ctx.fill();
+                        ctx.strokeStyle = '#0284c7';
+                        ctx.stroke();
+                    }
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 16px Inter';
+                    const txt = isAnswered ? `${q.meta.result}` : `❓ van ${q.meta.total}`;
+                    ctx.fillText(txt, cx - 35, cy + radius + 30);
+                    break;
+                }
+
+                default: {
+                    // Generic fallback visualizer box
+                    ctx.fillStyle = isAnswered ? '#10b981' : '#06b6d4';
+                    ctx.font = 'bold 24px Inter';
+                    const val = isAnswered ? `Uitkomst = ${q.correctAnswer}` : `❓`;
+                    ctx.fillText(val, w / 2 - 40, h / 2);
+                    break;
+                }
+            }
+
+            // Visualizer status banner update
+            const statusEl = document.getElementById('visualizerStatus');
+            if (isAnswered) {
+                statusEl.className = "text-[10px] px-2.5 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse";
+                statusEl.innerHTML = `✓ Oplossing Onthuld!`;
+            } else {
+                statusEl.className = "text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700";
+                statusEl.innerHTML = `Zoek de missing waarde ❓`;
+            }
+        }
+
+        /* GAMEPLAY CONTROLLERS */
+        function startGame() {
+            audio.playClick();
+
+            // Reset Game State
+            gameState = {
+                active: true,
+                score: 0,
+                lives: 3,
+                streak: 0,
+                maxStreak: 0,
+                totalAnswered: 0,
+                correctAnswers: 0,
+                timer: gameConfig.durationSeconds,
+                timerInterval: null,
+                currentQuestion: null,
+                isAnswered: false
+            };
+
+            // UI Screen Switches
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('gameplayStats').classList.remove('hidden');
+
+            updateStatsUI();
+
+            // Start Timer
+            clearInterval(gameState.timerInterval);
+            gameState.timerInterval = setInterval(() => {
+                if (gameState.timer > 0) {
+                    gameState.timer--;
+                    updateTimerDisplay();
+                } else {
+                    endGame(true); // Time's up
+                }
+            }, 1000);
+
+            // Load First Question
+            loadNextQuestion();
+        }
+
+        function loadNextQuestion() {
+            gameState.isAnswered = false;
+            generateQuestion();
+
+            const q = gameState.currentQuestion;
+
+            // Update UI Elements
+            document.getElementById('categoryTitle').innerText = q.prompt;
+            document.getElementById('questionText').innerText = q.text;
+            document.getElementById('questionCounter').innerText = gameState.totalAnswered + 1;
+            document.getElementById('levelBadge').innerText = `Level ${gameState.selectedLevel}`;
+
+            // Hide feedback box
+            document.getElementById('feedbackBox').classList.add('hidden');
+
+            // Render Options Buttons
+            const optionsGrid = document.getElementById('optionsGrid');
+            optionsGrid.innerHTML = '';
+
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn-option p-4 rounded-2xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-white font-bold text-lg sm:text-xl shadow-lg transition-all flex items-center justify-between text-left';
+                btn.innerHTML = `
+                    <span>${opt}</span>
+                    <i class="fa-regular fa-circle text-slate-500 text-sm"></i>
+                `;
+                btn.onclick = () => handleAnswer(opt, btn);
+                optionsGrid.appendChild(btn);
+            });
+
+            // Render Canvas Graphic
+            renderVisualizer(false);
+        }
+
+        function handleAnswer(selectedOpt, btnElement) {
+            if (gameState.isAnswered) return;
+            gameState.isAnswered = true;
+
+            const q = gameState.currentQuestion;
+            const isCorrect = (selectedOpt === q.correctAnswer);
+
+            gameState.totalAnswered++;
+
+            const feedbackBox = document.getElementById('feedbackBox');
+            const feedbackTitle = document.getElementById('feedbackTitle');
+            const feedbackExplanation = document.getElementById('feedbackExplanation');
+            const pointsAwarded = document.getElementById('pointsAwarded');
+
+            // Disable all option buttons
+            const allBtns = document.querySelectorAll('.btn-option');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-60', 'cursor-not-allowed');
+            });
+
+            if (isCorrect) {
+                audio.playCorrect();
+                gameState.correctAnswers++;
+                gameState.streak++;
+                if (gameState.streak > gameState.maxStreak) gameState.maxStreak = gameState.streak;
+
+                // Points calculation with combo streak
+                const basePoints = 100 * gameState.selectedLevel;
+                const bonusPoints = (gameState.streak - 1) * 25;
+                const totalPoints = basePoints + bonusPoints;
+                gameState.score += totalPoints;
+
+                // Highlight correct button
+                btnElement.className = 'btn-option p-4 rounded-2xl bg-emerald-500/20 border-2 border-emerald-500 text-emerald-300 font-extrabold text-lg sm:text-xl shadow-lg flex items-center justify-between';
+                btnElement.querySelector('i').className = 'fa-solid fa-circle-check text-emerald-400 text-base';
+
+                // Feedback UI
+                feedbackBox.className = 'p-4 rounded-2xl border bg-emerald-950/40 border-emerald-500/40 space-y-2 block animate-fade-in';
+                feedbackTitle.className = 'font-bold text-sm sm:text-base text-emerald-400 flex items-center gap-2';
+                feedbackTitle.innerHTML = `<i class="fa-solid fa-circle-check"></i> Uitstekend! Goed Beantwoord.`;
+                pointsAwarded.className = 'text-xs font-mono font-bold px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                pointsAwarded.innerText = `+${totalPoints} Ptn ${gameState.streak > 1 ? `(${gameState.streak}x Combo!)` : ''}`;
+
+            } else {
+                audio.playWrong();
+                gameState.streak = 0;
+                gameState.lives--;
+
+                // Highlight wrong button
+                btnElement.className = 'btn-option p-4 rounded-2xl bg-rose-500/20 border-2 border-rose-500 text-rose-300 font-extrabold text-lg sm:text-xl shadow-lg flex items-center justify-between';
+                btnElement.querySelector('i').className = 'fa-solid fa-circle-xmark text-rose-400 text-base';
+
+                // Highlight which one was the right answer
+                allBtns.forEach(b => {
+                    const textVal = parseFloat(b.querySelector('span').innerText);
+                    if (textVal === q.correctAnswer) {
+                        b.className = 'btn-option p-4 rounded-2xl bg-emerald-500/20 border border-emerald-500 text-emerald-300 font-bold text-lg sm:text-xl flex items-center justify-between';
+                    }
+                });
+
+                // Feedback UI
+                feedbackBox.className = 'p-4 rounded-2xl border bg-rose-950/40 border-rose-500/40 space-y-2 block animate-fade-in';
+                feedbackTitle.className = 'font-bold text-sm sm:text-base text-rose-400 flex items-center gap-2';
+                feedbackTitle.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Helaas! Het juiste antwoord was ${q.correctAnswer}.`;
+                pointsAwarded.className = 'text-xs font-mono font-bold px-2 py-1 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30';
+                pointsAwarded.innerText = `0 Ptn`;
+            }
+
+            feedbackExplanation.innerText = q.explanation;
+            updateStatsUI();
+
+            // Reveal Visualizer solution graphics
+            renderVisualizer(true);
+
+            // Check if lives reached 0
+            if (gameState.lives <= 0) {
+                setTimeout(() => endGame(false), 1500);
+            }
+        }
+
+        function nextQuestion() {
+            audio.playClick();
+            if (gameState.lives > 0) {
+                loadNextQuestion();
+            }
+        }
+
+        function updateStatsUI() {
+            document.getElementById('scoreDisplay').innerText = gameState.score;
+            document.getElementById('streakDisplay').innerText = `${gameState.streak}x`;
+
+            // Hearts string
+            let hearts = '';
+            for (let i = 0; i < 3; i++) {
+                hearts += (i < gameState.lives) ? '❤️' : '🖤';
+            }
+            document.getElementById('heartsDisplay').innerText = hearts;
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(gameState.timer / 60);
+            const secs = gameState.timer % 60;
+            document.getElementById('timerDisplay').innerText = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function endGame(timeFinished) {
+            clearInterval(gameState.timerInterval);
+            gameState.active = false;
+
+            audio.playVictory();
+
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            const accuracy = gameState.totalAnswered > 0 
+                ? Math.round((gameState.correctAnswers / gameState.totalAnswered) * 100) 
+                : 0;
+
+            document.getElementById('finalScore').innerText = gameState.score;
+            document.getElementById('finalAccuracy').innerText = `${accuracy}%`;
+            document.getElementById('finalStreak').innerText = `${gameState.maxStreak}x`;
+            document.getElementById('finalQuestions').innerText = `${gameState.correctAnswers}/${gameState.totalAnswered}`;
+
+            const resTitle = document.getElementById('resultTitle');
+            const resSub = document.getElementById('resultSubtitle');
+            const resIcon = document.getElementById('resultHeaderIcon');
+
+            if (gameState.lives <= 0) {
+                resIcon.innerHTML = '💔';
+                resIcon.className = 'w-20 h-20 mx-auto rounded-3xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-4xl shadow-xl border border-rose-500/30';
+                resTitle.innerText = "Game Over!";
+                resSub.innerText = "Je levens zijn op. Blijf oefenen om een wiskunde master te worden!";
+            } else if (timeFinished) {
+                resIcon.innerHTML = '⏱️';
+                resIcon.className = 'w-20 h-20 mx-auto rounded-3xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-4xl shadow-xl border border-cyan-500/30';
+                resTitle.innerText = "Tijd is om!";
+                resSub.innerText = "De gekozen tijd is voorbij. Uitstekende prestatie!";
+            }
+        }
+
+        function resetToStart() {
+            audio.playClick();
+            clearInterval(gameState.timerInterval);
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('gameplayStats').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+
+        /* SE 1 TEST & FEEDBACK MODULE CONTROLLERS */
+        function toggleSEModal() {
+            audio.playClick();
+            const modal = document.getElementById('seModal');
+            modal.classList.toggle('hidden');
+            renderSEFeedbackTable();
+        }
+
+        function getStoredFeedback() {
+            const data = localStorage.getItem('wiskunde_master_se_feedback');
+            return data ? JSON.parse(data) : defaultSEFeedback;
+        }
+
+        function renderSEFeedbackTable() {
+            const tbody = document.getElementById('seFeedbackTableBody');
+            const feedbackList = getStoredFeedback();
+            tbody.innerHTML = '';
+
+            feedbackList.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/50 transition-colors';
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-white">${item.name}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-xs">${item.duration} • ${item.level}</span></td>
+                    <td class="p-3 font-mono"><span class="text-cyan-400 font-bold">${item.score} ptn</span> <span class="text-emerald-400 text-xs ml-1">(Cijfer: ${item.grade})</span></td>
+                    <td class="p-3 text-slate-300 text-xs italic">"${item.comment}"</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function savePupilFeedback(e) {
+            e.preventDefault();
+            audio.playClick();
+
+            const name = document.getElementById('inputName').value.trim();
+            const score = document.getElementById('inputScore').value.trim();
+            const grade = parseFloat(document.getElementById('inputGrade').value).toFixed(1);
+            const comment = document.getElementById('inputComment').value.trim();
+
+            const newItem = {
+                name,
+                duration: "5 Min",
+                level: "Level 1-3",
+                score,
+                grade,
+                comment
+            };
+
+            const current = getStoredFeedback();
+            current.unshift(newItem);
+            localStorage.setItem('wiskunde_master_se_feedback', JSON.stringify(current));
+
+            document.getElementById('seAddForm').reset();
+            renderSEFeedbackTable();
+        }
+
+        function resetSEFeedback() {
+            audio.playClick();
+            localStorage.removeItem('wiskunde_master_se_feedback');
+            renderSEFeedbackTable();
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            renderSEFeedbackTable();
+            // Handle window resize for HTML5 canvas visualizer
+            window.addEventListener('resize', () => {
+                if (gameState.currentQuestion) {
+                    renderVisualizer(gameState.isAnswered);
+                }
+            });
+        };
+    </script>
+</body>
+</html>
