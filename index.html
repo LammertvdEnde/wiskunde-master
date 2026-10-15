@@ -61,7 +61,6 @@
 </head>
 <body class="bg-mathDark text-slate-100 min-h-screen font-sans flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
 
-    <!-- TOP NAVIGATION HEADER -->
     <header class="glass-panel sticky top-0 z-40 px-4 py-3 border-b border-slate-800">
         <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-2">
             <div class="flex items-center gap-3">
@@ -361,7 +360,7 @@
 
     <!-- FOOTER -->
     <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-800/80">
-        Wiskunde Master v2.0 • SE 1 Informatica & Wiskunde Project • Ontwikkeld met HTML, Tailwind & Web Audio
+        Wiskunde Master v2.0 • SE 1 Informatica & Wiskunde Project • Ontwikkelen met HTML, Tailwind & Web Audio
     </footer>
 
     <script>
@@ -373,92 +372,103 @@
 
             init() {
                 if (!this.ctx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    this.ctx = new AudioContext();
+                    try {
+                        const AudioContext = window.AudioContext || window.webkitAudioContext;
+                        this.ctx = new AudioContext();
+                    } catch(e) {}
                 }
             }
 
             playCorrect() {
                 this.init();
                 if (!this.ctx) return;
-                const now = this.ctx.currentTime;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(523.25, now); // C5
-                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
-                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
 
-                gain.gain.setValueAtTime(0.15, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
 
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
 
-                osc.start(now);
-                osc.stop(now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } catch(e) {}
             }
 
             playWrong() {
                 this.init();
                 if (!this.ctx) return;
-                const now = this.ctx.currentTime;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
 
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(220, now); // A3
-                osc.frequency.exponentialRampToValueAtTime(110, now + 0.25); // A2
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now); // A3
+                    osc.frequency.exponentialRampToValueAtTime(110, now + 0.25); // A2
 
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
 
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
 
-                osc.start(now);
-                osc.stop(now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } catch(e) {}
             }
 
             playClick() {
                 this.init();
                 if (!this.ctx) return;
-                const now = this.ctx.currentTime;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
 
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(800, now);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, now);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
 
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
 
-                osc.start(now);
-                osc.stop(now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } catch(e) {}
             }
 
             playVictory() {
                 this.init();
                 if (!this.ctx) return;
-                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-                notes.forEach((freq, idx) => {
-                    setTimeout(() => {
-                        const now = this.ctx.currentTime;
-                        const osc = this.ctx.createOscillator();
-                        const gain = this.ctx.createGain();
-                        osc.type = 'sine';
-                        osc.frequency.setValueAtTime(freq, now);
-                        gain.gain.setValueAtTime(0.15, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                        osc.connect(gain);
-                        gain.connect(this.ctx.destination);
-                        osc.start(now);
-                        osc.stop(now + 0.3);
-                    }, idx * 120);
-                });
+                try {
+                    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                    notes.forEach((freq, idx) => {
+                        setTimeout(() => {
+                            if (!this.ctx) return;
+                            const now = this.ctx.currentTime;
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(freq, now);
+                            gain.gain.setValueAtTime(0.15, now);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                            osc.connect(gain);
+                            gain.connect(this.ctx.destination);
+                            osc.start(now);
+                            osc.stop(now + 0.3);
+                        }, idx * 120);
+                    });
+                } catch(e) {}
             }
         }
 
@@ -508,7 +518,6 @@
 
             // Update Start Button Dynamic Text
             const startBtn = document.getElementById('startButton');
-            const minutes = Math.floor(seconds / 60);
             if (seconds === 60) {
                 startBtn.innerHTML = `⚡ Start 1-Minute Speedrun`;
             } else if (seconds === 180) {
@@ -627,7 +636,6 @@
                 }
 
                 case 'pythagoras': {
-                    // Pythagorean triples
                     const triples = [
                         { a: 3, b: 4, c: 5 },
                         { a: 6, b: 8, c: 10 },
@@ -696,10 +704,13 @@
         /* MATH CANVAS VISUALIZER RENDERER */
         function renderVisualizer(isAnswered) {
             const canvas = document.getElementById('mathCanvas');
+            if (!canvas) return;
             const ctx = canvas.getContext('2d');
 
             // Responsive high DPI resolution fix
             const rect = canvas.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+
             canvas.width = rect.width * window.devicePixelRatio;
             canvas.height = rect.height * window.devicePixelRatio;
             ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
@@ -904,12 +915,14 @@
 
             // Visualizer status banner update
             const statusEl = document.getElementById('visualizerStatus');
-            if (isAnswered) {
-                statusEl.className = "text-[10px] px-2.5 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse";
-                statusEl.innerHTML = `✓ Oplossing Onthuld!`;
-            } else {
-                statusEl.className = "text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700";
-                statusEl.innerHTML = `Zoek de missing waarde ❓`;
+            if (statusEl) {
+                if (isAnswered) {
+                    statusEl.className = "text-[10px] px-2.5 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse";
+                    statusEl.innerHTML = `✓ Oplossing Onthuld!`;
+                } else {
+                    statusEl.className = "text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700";
+                    statusEl.innerHTML = `Zoek de missing waarde ❓`;
+                }
             }
         }
 
@@ -964,7 +977,12 @@
             // Update UI Elements
             document.getElementById('categoryTitle').innerText = q.prompt;
             document.getElementById('questionText').innerText = q.text;
-            document.getElementById('questionCounter').innerText = gameState.totalAnswered + 1;
+            
+            const qCounter = document.getElementById('questionCounter');
+            if (qCounter) {
+                qCounter.innerText = gameState.totalAnswered + 1;
+            }
+
             document.getElementById('levelBadge').innerText = `Level ${gameState.selectedLevel}`;
 
             // Hide feedback box
@@ -987,7 +1005,7 @@
             });
 
             // Render Canvas Graphic
-            renderVisualizer(false);
+            setTimeout(() => renderVisualizer(false), 50);
         }
 
         function handleAnswer(selectedOpt, btnElement) {
@@ -1125,7 +1143,7 @@
                 resTitle.innerText = "Game Over!";
                 resSub.innerText = "Je levens zijn op. Blijf oefenen om een wiskunde master te worden!";
             } else if (timeFinished) {
-                resIcon.innerHTML = '⏱️';
+                resIcon.innerHTML = '⏱️️';
                 resIcon.className = 'w-20 h-20 mx-auto rounded-3xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-4xl shadow-xl border border-cyan-500/30';
                 resTitle.innerText = "Tijd is om!";
                 resSub.innerText = "De gekozen tijd is voorbij. Uitstekende prestatie!";
@@ -1156,6 +1174,7 @@
 
         function renderSEFeedbackTable() {
             const tbody = document.getElementById('seFeedbackTableBody');
+            if (!tbody) return;
             const feedbackList = getStoredFeedback();
             tbody.innerHTML = '';
 
@@ -1207,9 +1226,8 @@
         // Initialize on load
         window.onload = function() {
             renderSEFeedbackTable();
-            // Handle window resize for HTML5 canvas visualizer
             window.addEventListener('resize', () => {
-                if (gameState.currentQuestion) {
+                if (gameState.currentQuestion && gameState.active) {
                     renderVisualizer(gameState.isAnswered);
                 }
             });
